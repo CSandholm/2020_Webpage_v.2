@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+   
+    <head>
+    </head>
+        <canvas style="float:left;" width="1000" height="800" id="spelplan"></canvas>
+        <body style="max-width: 1200px">
+            <audio id="racksound">
+                <source src="sound/racksound.ogg"> <!--importerar ljudilfer och ger dem olika ID -->
+                <source src="sound/racksound.mp3">            
+            </audio>
+            <audio id="failsound">
+                <source src="sound/failsound.ogg">
+                <source src="sound/failsound.mp3">            
+            </audio>
+            <audio id="wallsound">
+                <source src="sound/wallsound.mp3">            
+            </audio>
+            <audio id="wallsound2">
+                <source src="sound/wallsound.mp3">            
+             </audio>
+            <audio id="wallsound3">
+                <source src="sound/wallsound.mp3">            
+            </audio>
+        <script>
+            var canvas;         //canvas är spelarplan istället för webbläsarfönster direkt
+            var canvasContent;
+            
+            var wall1; //tre väggar
+            var wall2;
+            var wall3;
+            
+            var wall1Height =1000; //väggars storlek
+            var wall1Width=10;
+            
+            var wall2Height =1000;
+            var wall2Width=10;
+            
+            var wall3Height =10;
+            var wall3Width=1000;
+
+            var bollXled=795;   //bollens position
+            var bollYled=400-15;
+            
+            var bollVX=15;    //bollens hastighet:
+            var bollVY=10;
+            var deltaBollY;    //deltaY beroende på bollen träffar på racket
+            
+            var fBollXled=790; //fiendeboll position
+            var fBollYled=400;
+            
+            var fBollVX=15; //bollens hastighet
+            var fBollVY=10;
+            var fCounter=0; //räknar träff med rack
+            var fActive=false;
+            
+            var score=0;      //spelarpoäng
+            var hit = 0;       //träffräknare
+            var multiplier=1; //poäng ökning
+            var topScoreList = [0,0,0,0,0]; 
+            
+            var rack = 150;         //spelar rack
+            var rackHeight = 100;
+            var rackWidth = 15;
+
+            var wallSound = document.getElementById("wallsound"); //ljud variablar
+            var wallSound2 = document.getElementById("wallsound2");
+            var wallSound3 = document.getElementById("wallsound3");
+            var rackSound = document.getElementById("racksound");
+            var failSound = document.getElementById("failsound");
+            
+            function colors(color, X, Y, height, width)  //funktioner för att färglägga och bestämma marginaler samt position på objekt
+            {
+                canvasContent.fillStyle = color;
+                canvasContent.fillRect(X, Y, height, width);
+            }
+            
+            function circle(color, X, Y, height, width) //funktioner för att färglägga och bestämma marginaler samt position på cirkel
+            {
+                canvasContent.fillStyle = color;
+                canvasContent.beginPath();
+                canvasContent.arc(X, Y, height, width,2*Math.PI); //2pi för rita cirkel
+                canvasContent.fill();
+            }
+            
+            function colorFill() //funktioner för att färglägga och bestämma marginaler samt position på objekt
+            {
+                colors('dimgray',0,0,canvas.width,canvas.height); //bakgrund
+                circle('lightgreen',bollXled,bollYled,10,0);     //boll
+                
+                if(fCounter==5) //om fCounter är 5 så aktiveras fiendeboll
+                {
+                    circle('red',fBollXled,fBollYled,10,0); //fiendeboll
+                    fActive=true; //fiende boll aktiv
+                } 
+                colors('yellow', 0, rack, rackWidth, rackHeight); //spelar rack
+                colors('darkred',0,0,   wall1Height, wall1Width);     //väggar   
+                colors('darkred',0,790, wall2Height, wall2Width);
+                colors('darkred',990,0, wall3Height, wall3Width);
+                colors("white", 790, 10, 2, 780); //mittensträck
+                canvasContent.fillText(score, 730,395)  //score text
+                canvasContent.font="25px Georgia";
+            }
+
+            function topList() //array för ScoreBoard som också sorterar poängen
+            {
+                for(i=0;i<topScoreList.length;i++)
+                    {
+                        if (score>topScoreList[i])
+                        {
+                            topScoreList[i+6] = topScoreList[i+5];
+                            topScoreList[i+5] = topScoreList[i+4];
+                            topScoreList[i+4] = topScoreList[i+3];
+                            topScoreList[i+3] = topScoreList[i+2];
+                            topScoreList[i+2] = topScoreList[i+1];
+                            topScoreList[i+1] = topScoreList[i];
+                            topScoreList[i]=score;
+                            break;
+                        }
+                    }
+                document.getElementById("topscorelist").innerHTML = topScoreList[0]; //SCOREBOARD utskrift
+                document.getElementById("topscorelist2").innerHTML = topScoreList[1];
+                document.getElementById("topscorelist3").innerHTML = topScoreList[2];
+                document.getElementById("topscorelist4").innerHTML = topScoreList[3];
+                document.getElementById("topscorelist5").innerHTML = topScoreList[4];
+            }
+             
+            function objectMovement()   //bollens rörelse och kollisioner
+            {
+                bollYled = bollVY + bollYled;   //bollens riktning och hastighet
+                bollXled = bollVX + bollXled;
+                
+                if(bollXled < 0)    //gränser under noll eller på rack
+                {
+                    if(bollYled>rack && bollYled<rack+rackHeight) //räddad eller inte av rack beroende på position av boll och rack, & poäng: 
+                        {
+                            rackSound.play();                        //spelar ljudeffekt
+                            bollVX = -bollVX;                       //återvänder bollen
+                            bollVX = bollVX*1.05;                   //ökar hastigheten
+                               
+                            if(bollVX>56)        //bestämmer max-hastighet på boll
+                                {
+                                    if(score<2000)
+                                    {
+                                        bollVX=56;
+                                    }
+                                    else if (score>2000)
+                                    {
+                                        bollVX=60
+                                    }
+                                    else if (score>5000)
+                                    {
+                                        bollVX=62
+                                    }
+                                }   
+                            
+                            deltaBollY = bollYled-(rackHeight/2+rack);//deltaY rackträff
+                            bollVY=0.32*deltaBollY;                 //ändrar hastigheten
+                            score = score+10 * multiplier;          //poäng*multiplier
+                            hit++;                              //hit = hit+1
+                            console.log("hits: "+hit);         //skriver ut antal räddningar i consolen
+                            console.log("bollVX: "+bollVX);  //skriver bollVX i consolen
+                            console.log("score: "+score);   //skriver score i consolen
+                            
+                            if(fCounter<5)   //max värde för fCounter är 5
+                                {
+                                    fCounter++;
+                                }
+                            else
+                                {
+                                    fCounter=5;
+                                }
+                            if(hit==4)
+                                {   
+                                    multiplier=multiplier+1;    //var femte träff ökar multipliern
+                                    hit=0;  //återställer antal träffar    
+                                }  
+                        }
+                        else
+                        {
+                            failSound.play();
+                            reset(); //kallar reset funktionen
+                        }
+                    }
+                if(bollXled>1000-10-15) //vägg gräns
+                    {
+                        wallSound.play();
+                        bollVX=-bollVX;                                       
+                    }
+                if(bollYled<10+1) //undre gräns
+                    {    
+                        wallSound2.play();
+                        bollVY = - bollVY;
+                    }
+                if(bollYled>800-10-15) //övre gräns
+                   {
+                        wallSound3.play();
+                        bollVY = - bollVY;
+                   } 
+            }
+            
+            function fMovement() //fiendboll rörelse
+            {
+                fBollYled = fBollVY + fBollYled; //bollens riktning och hastighet
+                fBollXled = fBollVX + fBollXled;
+                
+                if(fBollXled < 0) //gränser under noll eller på rack
+                {
+                    if(fBollYled>rack && fBollYled<rack+rackHeight) //träff med rack så förlorar man 
+                        {
+                            failSound.play(); //spelar ljudeffekt
+                            reset(); 
+                        }
+                    else //återställer fiende position och gör inaktiv igen
+                    {
+                        fCounter = 0;
+                        fBollXled=790;
+                        fBollYled=400;
+                        fBollVX=-fBollVX;
+                        fActive=false;     
+                    }
+                }
+                 if(fBollXled>1000-10-15) //fiendeboll gränser vägg
+                    {
+                        wallSound.play();
+                        fBollVX= - fBollVX; 
+                    }
+                if(fBollYled>800-10-15) //övre gräns
+                   {
+                        wallSound3.play();
+                        fBollVY = - fBollVY;
+                   }
+                if(fBollYled<10+1) //undre gräns
+                    {    
+                        wallSound2.play();
+                        fBollVY = - fBollVY;
+                    }
+            }
+ 
+            window.onload = function() //först när allt har laddats ska denna funktion kallas
+            {
+                canvas = document.getElementById("spelplan");    //tar in spelplan:
+                canvasContent = canvas.getContext("2d");        //definierar kontext 2d:
+                setInterval(
+                    function()              //kallar funktioner
+                    {
+                        objectMovement();
+                        colorFill();
+                        if(fActive==true) //kallar fiendeboll funktion om true
+                            {
+                                fMovement();
+                            }
+                    }
+                    ,1000/30);//sätter interval 30 fps
+                
+                /***********************
+                FÖLJANDE KOD ÄR FRÅN Mouse controls, Developer.mozilla.org:
+                https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Mouse_controls
+                
+                jag kunde inte lösa mushanteringen på egen hand
+                ************************/
+                    document.addEventListener("mousemove", mouseMoveHandler, false);
+                
+                    function mouseMoveHandler(e) 
+                    {
+                        var relativeX = e.clientX - canvas.offsetLeft;
+                        if(relativeX > 0 && relativeX < canvas.width) 
+                        {
+                            rack = relativeX - rackWidth/2;
+                        }
+                    }
+                /***********************
+                OVANSTÅENDE KOD ÄR FRÅN Mouse controls, Developer.mozilla.org
+                 ************************/
+            }
+ 
+            function reset()        //resetar spelet och poängen
+            {
+                fActive=false;              //fiendeboll inaktiv
+                topList();                  //kallar scoreboard
+                bollVX=15;                  //nya värden för ny match
+                fBollVX=15;
+                bollVY=Math.floor(Math.random()*10);            //för att bollen inte alltid ska gå likadant
+                bollVY*=Math.floor(Math.random()*10)==1 ? 1:-1; //negativ Y hastighet möjlig vid serv
+
+                if(bollVY>=0 && bollVY<6)   //för att bollen inte ska gå för sakta i Yled vid serv
+                    {
+                        bollVY=bollVY+5;
+                    }
+                if(bollVY<=0 && bollVY>-6)   //för att bollen inte ska gå för sakta i -Yled vid serv
+                    {
+                        bollVY=bollVY-5;
+                    }
+                bollXled=795;        //position för "serv"
+                bollYled=400-15;
+                fBollXled=795;        //utgångsposition fiendeboll
+                fBollYled=400-15;
+                fCounter = 0; 
+                score=0;              //poäng återställning
+                hit = 0;
+                multiplier=1;
+            }
+        </script>
+        <!-- <p style="float:left;clear: left;">TOP-SCORE:</p> top score ruta -->
+        <!--<input value="" style="float:left;font-size: 26px;margin:8px;" type="text" id="top-score">-->
+        <div id="scoreboard" style="font-size: 27px; font-family: Georgia; color: grey;">
+            <center><p>SCOREBOARD</p><p style="color: red" id="topscorelist"></p>
+            <p style="color:indianred" id="topscorelist2"></p>  
+            <p style="color: lightsalmon" id="topscorelist3"></p>  
+            <p style="color: lightpink" id="topscorelist4"></p>  
+            <p style="color:lightgray" id="topscorelist5"></p>  
+            </center>
+            </div>
+            <center><a href="/gamelibrary.html" class="rubriker" type="button">TILLBAKA TILL HEMSIDAN</a></center>
+        </body>    
+    
+
+</html>

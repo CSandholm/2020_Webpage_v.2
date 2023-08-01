@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Ett Spel i Månaden</title>
+		<link href="style.css" rel="stylesheet" type="text/css">
+    </head>
+    <body>
+		<div class="topbar"></div>
+		<header>
+			<div class="headercontent headersquare1">
+				<div class="headersquare">
+						<img src="images/header/ettspelimanaden.png" class="headerlogo">
+						<a href="index.html"/>
+				</div>
+				<div class="headersquare headersquare2">
+					<div class="headerbars"></div>
+					<div class="navigation">
+                		<ul>
+							<li><a href="index.html">NYHETER & RECENSIONER</a></li>
+							<li><a href="gamelibrary.html">SPELUTVECKLING & BIBLIOTEK</a></li>
+							<li><a>REDAKTIONEN - [KOMMANDE]</a></li>
+							<li><a href="contact.html">KONTAKT</a></li>    
+						</ul>
+                	</div>
+            	</div>
+				<div class="headersquare headersquare3">
+					<div class="headerbars"></div>
+					<div class="login"></div>
+				</div>
+			</div>
+		</header>
+<!--************************************************************************************* !-->		
+        <div class="contentbody">
+				<div class="contact">
+						<p>Kontakt:</p><br/>
+						<p>EttSpeliManaden@gmail.com</p>
+				</div>
+			</div>
+		<footer>
+			<div class="footerarea">
+				<div class="footercontent">
+					<div class="socialmedia">
+						<div class="iconarea">
+							<a href="https://twitter.com/EttSpeliManaden" class="tooltip"><img src="icons/RoyalBlue-Ikoner/twitter-round.png" class="icons"><span class="tooltiptext"></span></a>
+							<a href="https://www.youtube.com/channel/UC1xbAcdNEZwqWidkI1hJTWA?view_as=subscriber" class="tooltip"><img src="icons/RoyalBlue-Ikoner/youtube.png" class="icons"><span class="tooltiptext"></span></a>
+							<a href="https://www.twitch.tv/ettspelimanaden" class="tooltip"><img src="icons/RoyalBlue-Ikoner/twitch.png" class="icons"><span class="tooltiptext"></span></a>
+							<a href="/contact.html"><img src="icons/RoyalBlue-Ikoner/mail.png" class="icons"><span class="tooltiptext"></span></a>
+							<a href="https://www.instagram.com/ettspelimanaden/" class="tooltip"><img src="icons/RoyalBlue-Ikoner/insta.png" class="icons firsticon"><span class="tooltiptext"></span></a>
+						</div>	
+					</div>
+					<div class="footerloggoarea">
+						<img src="images/header/ettspelimanadenrak.png" class="footerlogo">
+						<h1>COPYRIGHT 2020</h1>
+					</div>	
+				</div>
+			</div>		
+		</footer>
+		<script>
+			/* https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_read_more*/
+			var coll = document.getElementsByClassName("collapsible");
+			var i;
+					for (i = 0; i < coll.length; i++) 
+					{
+  						coll[i].addEventListener("click", function() {
+						this.classList.toggle("active");
+    					var content = this.nextElementSibling;
+    					if (content.style.display === "block") {
+      					content.style.display = "none";
+    				} 
+					else 
+					{
+      				content.style.display = "block";
+    				}
+  				});
+			} /* https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_read_more*/
+		</script>
+    </body>
+</html>
